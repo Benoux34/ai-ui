@@ -1,6 +1,7 @@
 "use client";
 
-import { ChatMessage } from "@/api/ollama";
+import { formatMessageTime } from "@/lib/date";
+import { ChatMessage } from "@/services/backend";
 
 type Props = {
   message: ChatMessage;
@@ -21,10 +22,7 @@ const UserBubble = ({ message }: Props) => {
 
           <div className="flex justify-end border-t border-gray-600 mt-2 pt-2">
             <span className="text-[10px] text-gray-500">
-              {message.timestamp.toLocaleTimeString("fr-FR", {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
+              {formatMessageTime(message.timestamp)}
             </span>
           </div>
         </div>

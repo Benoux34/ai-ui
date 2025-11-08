@@ -2,11 +2,11 @@
 
 import { useState, useCallback } from "react";
 import {
+  streamChatMessage,
+  sendChatMessage,
   ChatMessage,
   OllamaChatMessage,
-  sendChatMessage,
-  streamChatMessage,
-} from "@/api/ollama";
+} from "..";
 
 export function useChat(model: string) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -30,8 +30,6 @@ export function useChat(model: string) {
       setMessages((prev) => [...prev, userMessage]);
 
       try {
-        let assistantContent = "";
-
         const assistantMessage: ChatMessage = {
           id: `assistant-${Date.now()}`,
           role: "assistant",
@@ -46,7 +44,10 @@ export function useChat(model: string) {
           { role: userMessage.role, content: userMessage.content },
         ];
 
-        for await (const chunk of streamChatMessage(model, ollamaMessages)) {
+        let assistantContent = "";
+        const stream = await streamChatMessage(model, ollamaMessages);
+
+        for await (const chunk of stream) {
           assistantContent += chunk;
 
           setMessages((prev) => {
@@ -63,7 +64,8 @@ export function useChat(model: string) {
         setError(
           err instanceof Error ? err.message : "Une erreur est survenue"
         );
-        console.error("Chat error:", err);
+        console.error("[useChat] Error:", err);
+        setMessages((prev) => prev.slice(0, -1));
       } finally {
         setIsLoading(false);
       }
@@ -93,12 +95,12 @@ export function useChat(model: string) {
           { role: userMessage.role, content: userMessage.content },
         ];
 
-        const response = await sendChatMessage(model, ollamaMessages);
+        const responseContent = await sendChatMessage(model, ollamaMessages);
 
         const assistantMessage: ChatMessage = {
           id: `assistant-${Date.now()}`,
           role: "assistant",
-          content: response,
+          content: responseContent,
           timestamp: new Date(),
         };
 
@@ -107,7 +109,7 @@ export function useChat(model: string) {
         setError(
           err instanceof Error ? err.message : "Une erreur est survenue"
         );
-        console.error("Chat error:", err);
+        console.error("[useChat] Error:", err);
       } finally {
         setIsLoading(false);
       }

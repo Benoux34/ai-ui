@@ -6,9 +6,9 @@ import {
   useState,
   useEffect,
   ReactNode,
-  useRef,
+  useCallback,
 } from "react";
-import { getOllamaModels } from "@/api/ollama";
+import { getOllamaModels } from "@/services/backend";
 
 const STORAGE_KEY = "ollama-selected-model";
 
@@ -21,52 +21,59 @@ type ModelContextType = {
 const ModelContext = createContext<ModelContextType | undefined>(undefined);
 
 export function ModelProvider({ children }: { children: ReactNode }) {
-  const initialModelRef = useRef<string | null>(null);
-
   const [availableModels, setAvailableModels] = useState<string[]>([]);
   const [currentModel, setCurrentModelState] = useState<string>("");
   const [mounted, setMounted] = useState<boolean>(false);
 
-  useEffect(() => {
-    setMounted(true);
-    const saved = localStorage.getItem(STORAGE_KEY);
-    initialModelRef.current = saved;
+  const fetchModels = useCallback(async () => {
+    try {
+      const response = await getOllamaModels();
 
-    if (saved) setCurrentModelState(saved);
+      const modelNames = response.models.map((model) => model.name);
+
+      if (modelNames.length === 0) {
+        console.warn("⚠️ No models available on Ollama server");
+        return;
+      }
+
+      setAvailableModels(modelNames);
+
+      const savedModel =
+        typeof window !== "undefined"
+          ? localStorage.getItem(STORAGE_KEY)
+          : null;
+
+      if (savedModel && modelNames.includes(savedModel)) {
+        setCurrentModelState(savedModel);
+      } else {
+        const defaultModel = modelNames[0];
+        setCurrentModelState(defaultModel);
+
+        if (typeof window !== "undefined")
+          localStorage.setItem(STORAGE_KEY, defaultModel);
+      }
+    } catch (err) {
+      console.error("❌ [ModelProvider] Failed to fetch models:", err);
+    }
   }, []);
 
   useEffect(() => {
-    if (!mounted) return;
+    setMounted(true);
+  }, []);
 
-    const fetchModels = async () => {
-      try {
-        const models = await getOllamaModels();
-        setAvailableModels(models);
+  useEffect(() => {
+    if (mounted) fetchModels();
+  }, [mounted, fetchModels]);
 
-        const savedModel = initialModelRef.current;
+  const setCurrentModel = useCallback((model: string) => {
+    if (!model) {
+      console.warn("⚠️ [setCurrentModel] Attempted to set empty model");
+      return;
+    }
 
-        if (savedModel && models.includes(savedModel))
-          setCurrentModelState(savedModel);
-        else {
-          const defaultModel = models[0] || "No models available";
-          setCurrentModelState(defaultModel);
-          localStorage.setItem(STORAGE_KEY, defaultModel);
-          initialModelRef.current = defaultModel;
-        }
-      } catch (error) {
-        console.error("❌ Failed to fetch models:", error);
-        setAvailableModels([]);
-      }
-    };
-
-    fetchModels();
-  }, [mounted]);
-
-  const setCurrentModel = (model: string) => {
     setCurrentModelState(model);
-    localStorage.setItem(STORAGE_KEY, model);
-    initialModelRef.current = model;
-  };
+    if (typeof window !== "undefined") localStorage.setItem(STORAGE_KEY, model);
+  }, []);
 
   if (!mounted) {
     return (
@@ -97,8 +104,6 @@ export function ModelProvider({ children }: { children: ReactNode }) {
 
 export function useModel() {
   const context = useContext(ModelContext);
-  if (!context) {
-    throw new Error("useModel must be used within ModelProvider");
-  }
+  if (!context) throw new Error("useModel must be used within ModelProvider");
   return context;
 }

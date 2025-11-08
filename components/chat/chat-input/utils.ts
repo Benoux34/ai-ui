@@ -16,7 +16,9 @@ const onClickSend = (
 
 const onKeyDown = (handleSend: () => Promise<void>) => {
   return (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+    if (e.key === "Enter") {
+      if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+
       e.preventDefault();
       handleSend();
     }

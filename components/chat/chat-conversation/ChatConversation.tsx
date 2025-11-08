@@ -1,15 +1,23 @@
 "use client";
 
+import { ChatMessage } from "@/services/backend";
 import { UserBubble } from "./user-bubble/UserBubble";
 import { AIBubble } from "./ai-bubble/AIBubble";
-import type { ChatMessage } from "@/api/ollama/entities";
+import { useEffect, useRef } from "react";
 
 type Props = {
   messages: ChatMessage[];
   currentModel: string;
+  isLoading: boolean;
 };
 
-const ChatConversation = ({ messages, currentModel }: Props) => {
+const ChatConversation = ({ messages, currentModel, isLoading }: Props) => {
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
   return (
     <div className="flex-1 overflow-y-auto pt-8 pb-4">
       {messages.map((message) => {
@@ -23,6 +31,7 @@ const ChatConversation = ({ messages, currentModel }: Props) => {
               key={message.id}
               message={message}
               currentModel={currentModel}
+              isLoading={isLoading}
             />
           );
         }
@@ -39,6 +48,8 @@ const ChatConversation = ({ messages, currentModel }: Props) => {
 
         return null;
       })}
+
+      <div ref={bottomRef} />
     </div>
   );
 };
