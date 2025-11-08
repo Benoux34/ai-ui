@@ -1,7 +1,6 @@
 "use server";
 
-import { ollamaClient } from "../client";
-import { OllamaModelsResponse } from "../entities";
+import { ollamaClient, OllamaModelsResponse } from "..";
 
 const getOllamaModels = async (): Promise<string[]> => {
   try {

@@ -1,14 +1,12 @@
 import { Clock, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useModel } from "@/contexts/model-context";
 
 type Props = {
   prompt: string;
+  currentModel: string;
 };
 
-const ChatDetails = ({ prompt }: Props) => {
-  const { currentModel } = useModel();
-
+const ChatDetails = ({ prompt, currentModel }: Props) => {
   const charCount = prompt.length;
   const wordCount = prompt.trim() ? prompt.trim().split(/\s+/).length : 0;
   const lines = prompt.split("\n").length;

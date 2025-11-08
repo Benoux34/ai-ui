@@ -1,7 +1,6 @@
 "use server";
 
-import { ollamaClient } from "../client";
-import { OllamaModelDetails } from "../entities";
+import { ollamaClient, OllamaModelDetails } from "..";
 
 const getOllamaModelDetails = async (
   modelName: string

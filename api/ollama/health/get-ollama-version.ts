@@ -1,4 +1,4 @@
-import { ollamaClient } from "../client";
+import { ollamaClient } from "..";
 
 const getOllamaVersion = async (): Promise<string | null> => {
   try {

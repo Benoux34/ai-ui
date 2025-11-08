@@ -1,4 +1,4 @@
-import { ollamaClient } from "../client";
+import { ollamaClient } from "..";
 
 const checkOllamaHealth = async (): Promise<boolean> => {
   try {

@@ -1,7 +1,6 @@
 "use server";
 
-import { ollamaClient } from "../client";
-import { OllamaGenerateRequest } from "../entities";
+import { ollamaClient, OllamaGenerateRequest } from "..";
 
 const generateText = (prompt: string, model: string) => {
   return ollamaClient.post<OllamaGenerateRequest, { response: string }>(
