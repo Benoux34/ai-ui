@@ -6,7 +6,7 @@ export { getOllamaModels } from "./actions/models.actions";
 
 export { checkOllamaHealth } from "./actions/health.actions";
 
-export { streamChatMessage, sendChatMessage } from "./actions/chat.actions";
+export { streamChatMessage } from "./actions/chat.actions";
 
 export type {
   OllamaModel,
@@ -18,5 +18,6 @@ export type {
   ChatMessage,
   OllamaChatMessage,
   ChatStreamChunk,
-  OllamaChatResponse,
+  WebSource,
+  ResponseMetadata,
 } from "./types/chat.types";

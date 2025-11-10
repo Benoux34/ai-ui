@@ -8,24 +8,26 @@ export type ChatMessage = {
   role: "user" | "assistant" | "system";
   content: string;
   timestamp: Date;
+  sources?: WebSource[];
 };
 
 export type ChatStreamChunk = {
   content?: string;
+  sources?: WebSource[];
+  done?: boolean;
   error?: string;
 };
 
-export type OllamaChatResponse = {
-  model: string;
-  created_at: string;
-  message: {
-    role: "assistant";
-    content: string;
-  };
-  done: true;
-  total_duration: number;
-  load_duration: number;
-  prompt_eval_count: number;
-  eval_count: number;
-  eval_duration: number;
+export type WebSource = {
+  id: number;
+  title: string;
+  url: string;
+  content: string;
+};
+
+export type ResponseMetadata = {
+  web_search_used: boolean;
+  sources_count?: number;
+  rag_used?: boolean;
+  response_time_ms?: number;
 };

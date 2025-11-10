@@ -3,12 +3,12 @@
 import { useState, useCallback } from "react";
 import {
   streamChatMessage,
-  sendChatMessage,
   ChatMessage,
   OllamaChatMessage,
+  WebSource,
 } from "..";
 
-export function useChat(model: string) {
+export function useChat(model: string, isWeb: boolean) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -35,6 +35,7 @@ export function useChat(model: string) {
           role: "assistant",
           content: "",
           timestamp: new Date(),
+          sources: undefined,
         };
 
         setMessages((prev) => [...prev, assistantMessage]);
@@ -45,10 +46,14 @@ export function useChat(model: string) {
         ];
 
         let assistantContent = "";
-        const stream = await streamChatMessage(model, ollamaMessages);
+        let sources: WebSource[] | undefined;
+
+        const stream = await streamChatMessage(model, ollamaMessages, isWeb);
 
         for await (const chunk of stream) {
-          assistantContent += chunk;
+          if (chunk.content) assistantContent += chunk.content;
+
+          if (chunk.sources) sources = chunk.sources;
 
           setMessages((prev) => {
             const newMessages = [...prev];
@@ -56,6 +61,7 @@ export function useChat(model: string) {
             newMessages[newMessages.length - 1] = {
               ...lastMessage,
               content: assistantContent,
+              sources: sources,
             };
             return newMessages;
           });
@@ -70,51 +76,7 @@ export function useChat(model: string) {
         setIsLoading(false);
       }
     },
-    [model, messages]
-  );
-
-  const sendMessageSync = useCallback(
-    async (content: string) => {
-      if (!content.trim()) return;
-
-      setIsLoading(true);
-      setError(null);
-
-      const userMessage: ChatMessage = {
-        id: `user-${Date.now()}`,
-        role: "user",
-        content,
-        timestamp: new Date(),
-      };
-
-      setMessages((prev) => [...prev, userMessage]);
-
-      try {
-        const ollamaMessages: OllamaChatMessage[] = [
-          ...messages.map(({ role, content }) => ({ role, content })),
-          { role: userMessage.role, content: userMessage.content },
-        ];
-
-        const responseContent = await sendChatMessage(model, ollamaMessages);
-
-        const assistantMessage: ChatMessage = {
-          id: `assistant-${Date.now()}`,
-          role: "assistant",
-          content: responseContent,
-          timestamp: new Date(),
-        };
-
-        setMessages((prev) => [...prev, assistantMessage]);
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Une erreur est survenue"
-        );
-        console.error("[useChat] Error:", err);
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [model, messages]
+    [model, messages, isWeb]
   );
 
   const clearMessages = useCallback(() => {
@@ -127,7 +89,6 @@ export function useChat(model: string) {
     isLoading,
     error,
     sendMessage,
-    sendMessageSync,
     clearMessages,
   };
 }

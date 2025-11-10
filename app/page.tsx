@@ -11,7 +11,7 @@ export default function Chat() {
   const [isRag, setIsRag] = useState<boolean>(false);
 
   const { currentModel } = useModel();
-  const { messages, sendMessage, isLoading } = useChat(currentModel);
+  const { messages, sendMessage, isLoading } = useChat(currentModel, isWeb);
 
   return (
     <div className="w-full h-screen flex flex-col p-8">
