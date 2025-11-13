@@ -2,6 +2,7 @@
 
 import { formatMessageTime } from "@/lib/date";
 import { ChatMessage } from "@/services/backend";
+import { UserBubbleHeader } from "./header/UserBubbleHeader";
 
 type Props = {
   message: ChatMessage;
@@ -11,19 +12,21 @@ const UserBubble = ({ message }: Props) => {
   return (
     <div className="flex w-full justify-end mb-6">
       <div className="max-w-[80%]">
-        <div className="flex items-center gap-2 mb-2 px-1 justify-end">
-          <span className="text-xs text-gray-400 font-medium">YOU</span>
-        </div>
+        <UserBubbleHeader />
 
-        <div className="bg-gray-500/10 border border-gray-500/30 rounded-lg px-4 py-3">
-          <p className="text-sm text-gray-100 leading-relaxed whitespace-pre-wrap break-words">
-            {message.content}
-          </p>
+        <div className="bg-[#1a1a1a] border border-[#2d2d2d] rounded-lg overflow-hidden">
+          <div className="px-4 py-3">
+            <p className="text-sm text-gray-100 leading-relaxed whitespace-pre-wrap break-words">
+              {message.content}
+            </p>
+          </div>
 
-          <div className="flex justify-end border-t border-gray-600 mt-2 pt-2">
-            <span className="text-[10px] text-gray-500">
-              {formatMessageTime(message.timestamp)}
-            </span>
+          <div className="px-4 py-2 bg-[#0d0d0d] border-t border-[#2d2d2d]">
+            <div className="flex items-center justify-end">
+              <span className="text-[10px] text-gray-500">
+                {formatMessageTime(message.timestamp)}
+              </span>
+            </div>
           </div>
         </div>
       </div>

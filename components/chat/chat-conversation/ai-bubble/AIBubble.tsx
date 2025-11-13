@@ -44,9 +44,12 @@ const AIBubble = ({ message, currentModel, isLoading }: Props) => {
               <span className="text-[10px] text-gray-600">
                 via {currentModel}
               </span>
-              <span className="text-[10px] text-gray-500">
-                {formatMessageTime(message.timestamp)}
-              </span>
+
+              {!isLoading && (
+                <span className="text-[10px] text-gray-500">
+                  {formatMessageTime(message.timestamp)}
+                </span>
+              )}
             </div>
           </div>
         </div>

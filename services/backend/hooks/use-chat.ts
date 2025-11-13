@@ -60,6 +60,7 @@ export function useChat(model: string, isWeb: boolean) {
             const lastMessage = newMessages[newMessages.length - 1];
             newMessages[newMessages.length - 1] = {
               ...lastMessage,
+              timestamp: new Date(),
               content: assistantContent,
               sources: sources,
             };
